@@ -1,8 +1,7 @@
 use std::io::Write;
 use std::fs::File;
 use std::env;
-use std::fs;
-use rand::Rng;
+
 
 
 static HEXFILL_CONTENTS: [&str; 6] = ["Nothing", "Nothing", "Nothing", "Settlement", "Lair", "Weird"];
@@ -13,12 +12,12 @@ static HEX_NOTES: [&str; 6] = ["Relationship to nearby hex ",
 	"A boon or ally. ",
 	"Hostile. ",
 	"Roll again & once on Weird "];
-static WEIRD_FEATURES: [&str; 10] = ["Geography",
-"Magical Component", "Strange Merchant",
-"Strange Tutor", "Strange Ally",
-"Animal Behavior", "Clue to Nearby Hex",
-"Historical Location", "Treasure",
-"Roll Twice and Combine"];
+static WEIRD_FEATURES: [&str; 10] = ["Geography ",
+"Magical Component ", "Strange Merchant ",
+"Strange Tutor ", "Strange Ally ",
+"Animal Behavior ", "Clue to Nearby Hex ",
+"Historical Location ", "Treasure ",
+"Roll Twice and Combine "];
 
 struct Arguments {
 	file_name: String,
@@ -104,12 +103,12 @@ fn weird_gen() -> String {
 	}
 }
 
-fn main() {
+fn main() ->std::io::Result<()> {
 
     let args: Vec<String> = env::args().collect();
 
 	let parsed_args = parse_config(&args);
-	let file = File::create("Hexfill.txt");
+	let mut file = File::create(parsed_args.file_name)?;
 
 
 	let loop_start_row = parsed_args.lower_bound_row;
@@ -124,19 +123,48 @@ fn main() {
 			let contents = hex_contents_gen();
 
 			if contents.eq(&"Nothing".to_string()) {
+				
+				let header = format!("## {}.{}\nEmpty\n\n", column, row);
+
+				write!(file, "{}", header)?;
+				
 				continue
 			}
 			else if contents.eq(&"Settlement".to_string()) {
+
+				let population: i32 = settlement_sop_gen();
+				let notes: String = hex_notes_gen();
+
+				let header = format!("## {}.{}\n", column, row);
+				let body = format!("{}\nPopulation: {}\n\n", notes, population);
+
+				write!(file, "{}{}", header, body)?;
 				continue
 			}
 			else if contents.eq(&"Lair".to_string()) {
+		
+				let notes: String = hex_notes_gen();
+
+				let header = format!("## {}.{}\n", column, row);
+				let body = format!("Lair\nNotes: {}\n\n", notes);
+
+				write!(file, "{}{}", header, body)?;
 				continue
 			}
 			else if contents.eq(&"Weird".to_string()) {
+				
+				let weird = weird_gen();
+
+				let header = format!("## {}.{}\n", column, row);
+				let body = format!("Weird: {}\n\n", weird);
+
+				write!(file, "{}{}", header, body)?;
 				continue
 			}
 		}
 	}
+
+	Ok(())
 
     
 
