@@ -7,10 +7,18 @@ use rand::Rng;
 
 static HEXFILL_CONTENTS: [&str; 6] = ["Nothing", "Nothing", "Nothing", "Settlement", "Lair", "Weird"];
 static SETTLEMENT_POP: [i32; 6] = [100, 100, 100, 100, 600, 180];
-static HEX_NOTES: [&str; 6] = ["Relationship to nearby hex", "Relationship to nearby hex", "Relationship to nearby hex", "A boon or ally.", "Hostile.",
- "Roll again & once on Weird"];
-static WEIRD_FEATURES: [&str; 10] = ["Geography", "Magical Component", "Strange Merchant",
- "Strange Tutor", "Strange Ally", "Animal Behavior", "Clue to Nearby Hex", "Historical Location", "Treasure", "Roll Twice and Combine"];
+static HEX_NOTES: [&str; 6] = ["Relationship to nearby hex ",
+ 	"Relationship to nearby hex ",
+	"Relationship to nearby hex ",
+	"A boon or ally. ",
+	"Hostile. ",
+	"Roll again & once on Weird "];
+static WEIRD_FEATURES: [&str; 10] = ["Geography",
+"Magical Component", "Strange Merchant",
+"Strange Tutor", "Strange Ally",
+"Animal Behavior", "Clue to Nearby Hex",
+"Historical Location", "Treasure",
+"Roll Twice and Combine"];
 
 struct Arguments {
 	file_name: String,
@@ -43,28 +51,57 @@ fn parse_config(args: &Vec<String>) -> Arguments {
 
 }
 
-fn hex_contents_gen() -> str {
+fn hex_contents_gen() -> String {
     //Generates a random number
     //Returns the value in Gearing's 
     //Table
+    let rand_num: usize = random_number(0, 5).try_into().unwrap();
+    return HEXFILL_CONTENTS[rand_num].to_string();
 }
 
-fn settlement_sop_gen() -> str {
+fn settlement_sop_gen() -> i32 {
     //Generates a random number
     //Returns the value in Gearing's 
     //Table
+    let rand_num: usize = random_number(0, 5).try_into().unwrap();
+    return random_number(0, SETTLEMENT_POP[rand_num]);
 }
 
-fn settlement_notes_gen() -> str {
+fn hex_notes_gen() -> String {
     //Generates a random number
     //Returns the value in Gearing's 
     //Table
+	let rand_num: usize = random_number(0, 5).try_into().unwrap();
+
+	if rand_num == 5 {
+		let weird = weird_gen().to_string();
+		let settlement_notes_str = hex_notes_gen().to_string();
+		let return_str = String::new() + &weird + &settlement_notes_str;
+		return return_str;
+	}
+	else {
+		let return_str = HEX_NOTES[rand_num].to_string();
+		return return_str; 
+	}
+
 }
 
-fn werid_gen() -> str {
+fn weird_gen() -> String {
     //Generates a random number
     //Returns the value in Gearing's 
     //Table
+	let rand_num: usize = random_number(0, 9).try_into().unwrap();
+
+	if rand_num == 9 {
+		let new_num: usize = random_number(0, 9).try_into().unwrap();
+		let weird_one: String = WEIRD_FEATURES[new_num].to_string();
+		let weird_two = weird_gen();
+		let return_str = String::new() + &weird_one + &weird_two;
+		return return_str
+	}
+	else {
+		return WEIRD_FEATURES[rand_num].to_string();
+	}
 }
 
 fn main() {
@@ -74,7 +111,34 @@ fn main() {
 	let parsed_args = parse_config(&args);
 	let file = File::create("Hexfill.txt");
 
+
+	let loop_start_row = parsed_args.lower_bound_row;
+	let loop_start_column = parsed_args.lower_bound_column;
+
+	let loop_end_row = parsed_args.upper_bound_row;
+	let loop_end_column = parsed_args.upper_bound_column;
+
+	for row in loop_start_row..loop_end_row+1 {
+		
+		for column in loop_start_column..loop_end_column+1 {
+			let contents = hex_contents_gen();
+
+			if contents.eq(&"Nothing".to_string()) {
+				continue
+			}
+			else if contents.eq(&"Settlement".to_string()) {
+				continue
+			}
+			else if contents.eq(&"Lair".to_string()) {
+				continue
+			}
+			else if contents.eq(&"Weird".to_string()) {
+				continue
+			}
+		}
+	}
+
     
 
-	let ret = 0;
+	
 } 
